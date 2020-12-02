@@ -1,7 +1,9 @@
-FROM golang:alpine
-RUN mkdir /app
-COPY goendpoint.go /app
+FROM golang:alpine as golang
+WORKDIR /go/src/app
+COPY . .
+RUN CGO_ENABLED=0 go install -ldflags '-extldflags "-static"'
 
-RUN cd /app/ && go build /app/goendpoint.go
+FROM scratch
+COPY --from=golang /go/bin/app /app
 EXPOSE 5003
-CMD ["/app/goendpoint"]
+ENTRYPOINT ["/app"]
